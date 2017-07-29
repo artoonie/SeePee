@@ -1,5 +1,5 @@
 import csv
-import datetime
+from dateutil import parser
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import pytz
@@ -10,14 +10,9 @@ def readPees(tzString):
     with open('pees-ex.csv', 'rb') as f:
         reader = csv.reader(f)
         reader.next() # skip first title row
+
         for row in reader:
-            peeTimeStr = row[0]
-            dt = datetime.datetime.strptime(peeTimeStr, '%Y-%m-%d %H:%M:%S +0000')
-
-            dt = tz.localize(dt, is_dst=None).astimezone(pytz.utc)
-            dt = dt.astimezone(tz)
-
-            pees.append(dt)
+            pees.append(parser.parse(row[0]).astimezone(tz))
     return pees
 
 def isWeekday(pee):
