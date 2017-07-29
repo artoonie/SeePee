@@ -3,6 +3,8 @@ Visualizes your logs from the iPhone App [Pee & See](https://itunes.apple.com/us
 
 Generates four plots - pull requests or emails welcome if you have additional suggestions.
 
+Be sure to update your timezone before running this.
+
 == Example/screenshot ==
 Using an example week of data, you'll get the following plots:
 ![Four plots of pee logs](example.png)
