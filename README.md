@@ -6,7 +6,11 @@ Generates four plots - pull requests or emails welcome if you have additional su
 
 Be sure to update your timezone before running this.
 
-## Example/screenshot
+## Example Usage
 
-Using an example week of data, you'll get the following plots:
+`python seepee.py pees-ex.csv`
+
+## Screenshot
+
+Using `pees-ex.csv`, you'll get the following plots:
 ![Four plots of pee logs](example.png)

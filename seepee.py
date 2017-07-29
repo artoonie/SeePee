@@ -3,11 +3,12 @@ from dateutil import parser
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import pytz
+import sys
 
-def readPees(tzString):
+def readPees(filename, tzString):
     pees = []
     tz = pytz.timezone(tzString)
-    with open('pees-ex.csv', 'rb') as f:
+    with open(filename, 'rb') as f:
         reader = csv.reader(f)
         reader.next() # skip first title row
 
@@ -38,6 +39,27 @@ def visPeeDiffsByDay(pees, ax):
 
     ax.set_title("# hours between pees (white=morning, black=night)")
     ax.scatter(datesAll, diffsAll, s=20, c=colorMaps)
+
+
+def _visWeekdayByData(dates, data, ax):
+    assert len(data) == len(dates)
+
+    weekendX = []
+    weekendY = []
+    weekdayX = []
+    weekdayY = []
+
+    for i in xrange(len(dates)):
+        if not isWeekday(dates[i]):
+            weekendX.append(dates[i])
+            weekendY.append(data[i])
+        else:
+            weekdayX.append(dates[i])
+            weekdayY.append(data[i])
+
+    ax.scatter(weekendX, weekendY, c='red', s=30)
+    ax.scatter(weekdayX, weekdayY, c='yellow', s=30)
+    ax.set_title(ax.get_title() + "\n(weekdays=yellow, weekends=red)")
 
 def visPeeDiffAverageByDay(pees, ax):
     lastDate = None
@@ -72,38 +94,25 @@ def visPeeDiffAverageByDay(pees, ax):
 
     ax.set_title("Average # hours between pees per day")
     ax.plot(dates, averages)
+    _visWeekdayByData(dates, averages, ax)
 
 def visPeeCountByDay(pees, ax):
     lastDate = None
     dates = []
     peeCount = []
 
-    weekendX = []
-    weekendY = []
-    weekdayX = []
-    weekdayY = []
-
     for p in pees:
         currDate = p.date()
         if currDate != lastDate:
-            if lastDate:
-                if not isWeekday(lastDate):
-                    weekendX.append(lastDate)
-                    weekendY.append(peeCount[-1])
-                else:
-                    weekdayX.append(lastDate)
-                    weekdayY.append(peeCount[-1])
-
             dates.append(currDate)
             peeCount.append(1)
             lastDate = currDate
         else:
             peeCount[-1] += 1
 
-    ax.set_title("Number of pees per day (weekdays=yellow, weekends=red)")
+    ax.set_title("Number of pees per day")
     ax.plot(dates, peeCount)
-    ax.scatter(weekendX, weekendY, c='red', s=30)
-    ax.scatter(weekdayX, weekdayY, c='yellow', s=30)
+    _visWeekdayByData(dates, peeCount, ax)
 
 def visPeesByHour(pees, ax):
     dates = []
@@ -115,8 +124,13 @@ def visPeesByHour(pees, ax):
     ax.set_title("Pees by hour")
     ax.scatter(dates, hours)
 
+try:
+    filename = sys.argv[1]
+except IndexError:
+    print "Usage: python seepee.py <filename-of-CSV>"
+    sys.exit(-1)
 tzString = "US/Pacific"
-pees = readPees(tzString)
+pees = readPees(filename, tzString)
 
 datemin = pees[0].date()
 datemax = pees[-1].date()
@@ -136,9 +150,9 @@ def _makeAxis(yMax):
 
 plt.figure(num="Pee & See Visualization (Timezone %s)" % tzString)
 visPeeDiffsByDay      (pees, _makeAxis(20))
-visPeeDiffAverageByDay(pees, _makeAxis(6))
-visPeeCountByDay      (pees, _makeAxis(25))
+visPeeDiffAverageByDay(pees, _makeAxis(8))
 visPeesByHour         (pees, _makeAxis(24))
+visPeeCountByDay      (pees, _makeAxis(25))
 
 # Seems to have no impact:
 # weekdayPees = returnOnlyWeekdays(pees)
